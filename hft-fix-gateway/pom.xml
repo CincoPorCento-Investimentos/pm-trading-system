@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.cryptohft</groupId>
+        <artifactId>crypto-hft-platform</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>hft-fix-gateway</artifactId>
+    <name>HFT FIX Gateway</name>
+    <description>FIX protocol gateway for exchange connectivity</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.cryptohft</groupId>
+            <artifactId>hft-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.cryptohft</groupId>
+            <artifactId>hft-sbe</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.cryptohft</groupId>
+            <artifactId>hft-aeron</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.quickfixj</groupId>
+            <artifactId>quickfixj-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.quickfixj</groupId>
+            <artifactId>quickfixj-messages-fix44</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+    </dependencies>
+</project>

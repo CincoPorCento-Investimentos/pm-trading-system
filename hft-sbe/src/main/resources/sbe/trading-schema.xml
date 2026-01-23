@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   package="com.cryptohft.sbe"
+                   id="1"
+                   version="1"
+                   semanticVersion="1.0.0"
+                   description="HFT Trading Messages Schema"
+                   byteOrder="littleEndian">
+
+    <!-- Common Types -->
+    <types>
+        <composite name="messageHeader" description="Message header">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
+        </composite>
+
+        <composite name="groupSizeEncoding" description="Repeating group size">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="numInGroup" primitiveType="uint16"/>
+        </composite>
+
+        <composite name="varStringEncoding" description="Variable length string">
+            <type name="length" primitiveType="uint32" maxValue="1073741824"/>
+            <type name="varData" primitiveType="uint8" length="0" characterEncoding="UTF-8"/>
+        </composite>
+
+        <composite name="decimal" description="Decimal price/quantity">
+            <type name="mantissa" primitiveType="int64"/>
+            <type name="exponent" primitiveType="int8"/>
+        </composite>
+
+        <type name="timestamp" primitiveType="int64" description="Epoch nanoseconds"/>
+        <type name="sequenceNumber" primitiveType="uint64" description="Sequence number"/>
+
+        <enum name="SideEnum" encodingType="uint8">
+            <validValue name="Buy">1</validValue>
+            <validValue name="Sell">2</validValue>
+        </enum>
+
+        <enum name="OrderTypeEnum" encodingType="uint8">
+            <validValue name="Market">1</validValue>
+            <validValue name="Limit">2</validValue>
+            <validValue name="Stop">3</validValue>
+            <validValue name="StopLimit">4</validValue>
+            <validValue name="TrailingStop">5</validValue>
+        </enum>
+
+        <enum name="TimeInForceEnum" encodingType="uint8">
+            <validValue name="GTC">1</validValue>
+            <validValue name="IOC">2</validValue>
+            <validValue name="FOK">3</validValue>
+            <validValue name="Day">4</validValue>
+            <validValue name="GTD">5</validValue>
+        </enum>
+
+        <enum name="OrderStatusEnum" encodingType="uint8">
+            <validValue name="New">1</validValue>
+            <validValue name="PartiallyFilled">2</validValue>
+            <validValue name="Filled">3</validValue>
+            <validValue name="Cancelled">4</validValue>
+            <validValue name="Rejected">5</validValue>
+            <validValue name="Expired">6</validValue>
+            <validValue name="PendingNew">7</validValue>
+            <validValue name="PendingCancel">8</validValue>
+        </enum>
+
+        <enum name="ExecTypeEnum" encodingType="uint8">
+            <validValue name="New">0</validValue>
+            <validValue name="Trade">1</validValue>
+            <validValue name="Cancelled">2</validValue>
+            <validValue name="Replaced">3</validValue>
+            <validValue name="Rejected">4</validValue>
+            <validValue name="Expired">5</validValue>
+        </enum>
+
+        <enum name="MessageTypeEnum" encodingType="uint8">
+            <validValue name="NewOrder">1</validValue>
+            <validValue name="CancelOrder">2</validValue>
+            <validValue name="ReplaceOrder">3</validValue>
+            <validValue name="ExecutionReport">4</validValue>
+            <validValue name="OrderCancelReject">5</validValue>
+            <validValue name="MarketData">6</validValue>
+            <validValue name="Heartbeat">7</validValue>
+        </enum>
+    </types>
+
+    <!-- New Order Single -->
+    <sbe:message name="NewOrderSingle" id="1" description="New order request">
+        <field name="orderId" id="1" type="uint64"/>
+        <field name="clientOrderId" id="2" type="uint64"/>
+        <field name="accountId" id="3" type="uint32"/>
+        <field name="side" id="4" type="SideEnum"/>
+        <field name="orderType" id="5" type="OrderTypeEnum"/>
+        <field name="timeInForce" id="6" type="TimeInForceEnum"/>
+        <field name="price" id="7" type="decimal"/>
+        <field name="quantity" id="8" type="decimal"/>
+        <field name="stopPrice" id="9" type="decimal"/>
+        <field name="submittedNanos" id="10" type="timestamp"/>
+        <data name="symbol" id="11" type="varStringEncoding"/>
+        <data name="exchange" id="12" type="varStringEncoding"/>
+    </sbe:message>
+
+    <!-- Cancel Order Request -->
+    <sbe:message name="CancelOrderRequest" id="2" description="Cancel order request">
+        <field name="orderId" id="1" type="uint64"/>
+        <field name="clientOrderId" id="2" type="uint64"/>
+        <field name="accountId" id="3" type="uint32"/>
+        <field name="submittedNanos" id="4" type="timestamp"/>
+        <data name="symbol" id="5" type="varStringEncoding"/>
+    </sbe:message>
+
+    <!-- Replace Order Request -->
+    <sbe:message name="ReplaceOrderRequest" id="3" description="Replace/modify order request">
+        <field name="orderId" id="1" type="uint64"/>
+        <field name="clientOrderId" id="2" type="uint64"/>
+        <field name="newClientOrderId" id="3" type="uint64"/>
+        <field name="accountId" id="4" type="uint32"/>
+        <field name="price" id="5" type="decimal"/>
+        <field name="quantity" id="6" type="decimal"/>
+        <field name="submittedNanos" id="7" type="timestamp"/>
+        <data name="symbol" id="8" type="varStringEncoding"/>
+    </sbe:message>
+
+    <!-- Execution Report -->
+    <sbe:message name="ExecutionReport" id="4" description="Execution report/order update">
+        <field name="orderId" id="1" type="uint64"/>
+        <field name="clientOrderId" id="2" type="uint64"/>
+        <field name="execId" id="3" type="uint64"/>
+        <field name="accountId" id="4" type="uint32"/>
+        <field name="side" id="5" type="SideEnum"/>
+        <field name="orderType" id="6" type="OrderTypeEnum"/>
+        <field name="orderStatus" id="7" type="OrderStatusEnum"/>
+        <field name="execType" id="8" type="ExecTypeEnum"/>
+        <field name="price" id="9" type="decimal"/>
+        <field name="quantity" id="10" type="decimal"/>
+        <field name="filledQuantity" id="11" type="decimal"/>
+        <field name="remainingQuantity" id="12" type="decimal"/>
+        <field name="lastPrice" id="13" type="decimal"/>
+        <field name="lastQuantity" id="14" type="decimal"/>
+        <field name="avgPrice" id="15" type="decimal"/>
+        <field name="transactTime" id="16" type="timestamp"/>
+        <field name="sequenceNumber" id="17" type="sequenceNumber"/>
+        <data name="symbol" id="18" type="varStringEncoding"/>
+        <data name="exchange" id="19" type="varStringEncoding"/>
+        <data name="text" id="20" type="varStringEncoding"/>
+    </sbe:message>
+
+    <!-- Order Cancel Reject -->
+    <sbe:message name="OrderCancelReject" id="5" description="Cancel/replace rejection">
+        <field name="orderId" id="1" type="uint64"/>
+        <field name="clientOrderId" id="2" type="uint64"/>
+        <field name="accountId" id="3" type="uint32"/>
+        <field name="rejectReason" id="4" type="uint16"/>
+        <field name="transactTime" id="5" type="timestamp"/>
+        <data name="symbol" id="6" type="varStringEncoding"/>
+        <data name="text" id="7" type="varStringEncoding"/>
+    </sbe:message>
+
+    <!-- Market Data Snapshot -->
+    <sbe:message name="MarketDataSnapshot" id="6" description="Market data update">
+        <field name="sequenceNumber" id="1" type="sequenceNumber"/>
+        <field name="bidPrice" id="2" type="decimal"/>
+        <field name="bidQuantity" id="3" type="decimal"/>
+        <field name="askPrice" id="4" type="decimal"/>
+        <field name="askQuantity" id="5" type="decimal"/>
+        <field name="lastPrice" id="6" type="decimal"/>
+        <field name="lastQuantity" id="7" type="decimal"/>
+        <field name="volume24h" id="8" type="decimal"/>
+        <field name="high24h" id="9" type="decimal"/>
+        <field name="low24h" id="10" type="decimal"/>
+        <field name="timestamp" id="11" type="timestamp"/>
+        <field name="receivedNanos" id="12" type="timestamp"/>
+        <data name="symbol" id="13" type="varStringEncoding"/>
+        <data name="exchange" id="14" type="varStringEncoding"/>
+    </sbe:message>
+
+    <!-- Order Book Update -->
+    <sbe:message name="OrderBookUpdate" id="7" description="Order book level update">
+        <field name="sequenceNumber" id="1" type="sequenceNumber"/>
+        <field name="timestamp" id="2" type="timestamp"/>
+        <group name="bids" id="3" dimensionType="groupSizeEncoding">
+            <field name="price" id="4" type="decimal"/>
+            <field name="quantity" id="5" type="decimal"/>
+        </group>
+        <group name="asks" id="6" dimensionType="groupSizeEncoding">
+            <field name="price" id="7" type="decimal"/>
+            <field name="quantity" id="8" type="decimal"/>
+        </group>
+        <data name="symbol" id="9" type="varStringEncoding"/>
+        <data name="exchange" id="10" type="varStringEncoding"/>
+    </sbe:message>
+
+    <!-- Trade Update -->
+    <sbe:message name="TradeUpdate" id="8" description="Trade execution notification">
+        <field name="tradeId" id="1" type="uint64"/>
+        <field name="orderId" id="2" type="uint64"/>
+        <field name="side" id="3" type="SideEnum"/>
+        <field name="price" id="4" type="decimal"/>
+        <field name="quantity" id="5" type="decimal"/>
+        <field name="commission" id="6" type="decimal"/>
+        <field name="executedNanos" id="7" type="timestamp"/>
+        <field name="sequenceNumber" id="8" type="sequenceNumber"/>
+        <field name="isMaker" id="9" type="uint8"/>
+        <data name="symbol" id="10" type="varStringEncoding"/>
+        <data name="exchange" id="11" type="varStringEncoding"/>
+        <data name="commissionAsset" id="12" type="varStringEncoding"/>
+    </sbe:message>
+
+    <!-- Heartbeat -->
+    <sbe:message name="Heartbeat" id="9" description="Heartbeat message">
+        <field name="timestamp" id="1" type="timestamp"/>
+        <field name="sequenceNumber" id="2" type="sequenceNumber"/>
+    </sbe:message>
+
+    <!-- Position Update -->
+    <sbe:message name="PositionUpdate" id="10" description="Position snapshot">
+        <field name="accountId" id="1" type="uint32"/>
+        <field name="quantity" id="2" type="decimal"/>
+        <field name="avgEntryPrice" id="3" type="decimal"/>
+        <field name="realizedPnl" id="4" type="decimal"/>
+        <field name="unrealizedPnl" id="5" type="decimal"/>
+        <field name="timestamp" id="6" type="timestamp"/>
+        <data name="symbol" id="7" type="varStringEncoding"/>
+        <data name="exchange" id="8" type="varStringEncoding"/>
+    </sbe:message>
+
+</sbe:messageSchema>

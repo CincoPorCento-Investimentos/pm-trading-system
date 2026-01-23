@@ -1,0 +1,177 @@
+spring:
+  application:
+    name: hft-trading-platform
+  
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  
+  # Database Configuration
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:hft_trading}
+    username: ${DB_USERNAME:hft_user}
+    password: ${DB_PASSWORD:hft_password}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 20000
+      max-lifetime: 1200000
+      pool-name: HftHikariPool
+      
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+    show-sql: false
+    
+  # Flyway Configuration
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    
+  # Jackson Configuration
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+
+# Server Configuration
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    context-path: /
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+  tomcat:
+    max-threads: 200
+    accept-count: 100
+    max-connections: 10000
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    export:
+      prometheus:
+        enabled: true
+
+# HFT Configuration
+hft:
+  # Node Configuration
+  node:
+    id: ${NODE_ID:1}
+    
+  # Aeron Configuration
+  aeron:
+    enabled: ${AERON_ENABLED:false}
+    directory: ${AERON_DIR:/dev/shm/aeron-hft}
+    embedded: false
+    idle-strategy: YIELDING
+    
+  # Market Data Configuration
+  market-data:
+    exchange: ${MARKET_DATA_EXCHANGE:BINANCE}
+    symbols: ${MARKET_DATA_SYMBOLS:BTCUSDT,ETHUSDT,BNBUSDT}
+    tcp-port: ${MARKET_DATA_TCP_PORT:9500}
+    websocket-reconnect-delay: 5000
+    
+  # Risk Management Configuration
+  risk:
+    max-order-size: ${RISK_MAX_ORDER_SIZE:1000}
+    min-order-size: ${RISK_MIN_ORDER_SIZE:0.001}
+    max-position-size: ${RISK_MAX_POSITION_SIZE:10000}
+    max-daily-loss: ${RISK_MAX_DAILY_LOSS:100000}
+    max-orders-per-second: ${RISK_MAX_ORDERS_PER_SECOND:100}
+    
+  # FIX Configuration
+  fix:
+    enabled: ${FIX_ENABLED:false}
+    host: ${FIX_HOST:localhost}
+    port: ${FIX_PORT:9876}
+    sender-comp-id: ${FIX_SENDER_COMP_ID:HFT_CLIENT}
+    target-comp-id: ${FIX_TARGET_COMP_ID:EXCHANGE}
+    heartbeat-interval: 30
+    file-store-path: ./data/fix/store
+    file-log-path: ./data/fix/log
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    com.cryptohft: DEBUG
+    org.springframework: INFO
+    org.hibernate: WARN
+    io.aeron: INFO
+    quickfix: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: ./logs/hft-trading.log
+    max-size: 100MB
+    max-history: 30
+
+---
+# Development Profile
+spring:
+  config:
+    activate:
+      on-profile: dev
+      
+  datasource:
+    url: jdbc:postgresql://localhost:5432/hft_trading_dev
+    
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+hft:
+  market-data:
+    exchange: BINANCE
+    symbols: BTCUSDT,ETHUSDT
+
+logging:
+  level:
+    com.cryptohft: DEBUG
+
+---
+# Production Profile
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  jpa:
+    show-sql: false
+
+hft:
+  aeron:
+    idle-strategy: SPINNING
+    
+  risk:
+    max-orders-per-second: 1000
+
+logging:
+  level:
+    root: WARN
+    com.cryptohft: INFO
