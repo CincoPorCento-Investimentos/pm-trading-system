@@ -166,12 +166,6 @@
                 <version>${postgresql.version}</version>
             </dependency>
 
-            <!-- HikariCP - version managed by Spring Boot -->
-            <dependency>
-                <groupId>com.zaxxer</groupId>
-                <artifactId>HikariCP</artifactId>
-            </dependency>
-
             <!-- Guava -->
             <dependency>
                 <groupId>com.google.guava</groupId>
@@ -192,12 +186,6 @@
                 <groupId>org.mapstruct</groupId>
                 <artifactId>mapstruct</artifactId>
                 <version>${mapstruct.version}</version>
-            </dependency>
-
-            <!-- Flyway - version managed by Spring Boot -->
-            <dependency>
-                <groupId>org.flywaydb</groupId>
-                <artifactId>flyway-database-postgresql</artifactId>
             </dependency>
 
             <!-- Java-WebSocket -->
