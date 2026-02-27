@@ -96,12 +96,15 @@ hft:
     tcp-port: ${MARKET_DATA_TCP_PORT:9500}
     websocket-reconnect-delay: 5000
     
-  # Risk Management Configuration
+  # Risk Management Configuration (single source of truth for all risk limits)
   risk:
     max-order-size: ${RISK_MAX_ORDER_SIZE:1000}
     min-order-size: ${RISK_MIN_ORDER_SIZE:0.001}
+    max-order-notional: ${RISK_MAX_ORDER_NOTIONAL:1000000}
     max-position-size: ${RISK_MAX_POSITION_SIZE:10000}
+    max-total-exposure: ${RISK_MAX_TOTAL_EXPOSURE:10000000}
     max-daily-loss: ${RISK_MAX_DAILY_LOSS:100000}
+    max-price-deviation: ${RISK_MAX_PRICE_DEVIATION:0.10}
     max-orders-per-second: ${RISK_MAX_ORDERS_PER_SECOND:100}
     
   # FIX Configuration
