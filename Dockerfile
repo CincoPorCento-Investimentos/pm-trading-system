@@ -1,6 +1,6 @@
 # Multi-stage build for HFT Trading Platform
 # Stage 1: Build
-FROM eclipse-temurin:17-jdk-jammy AS builder
+FROM eclipse-temurin:21-jdk-jammy AS builder
 
 WORKDIR /app
 
@@ -40,7 +40,7 @@ RUN mvn clean package -DskipTests -B
 RUN java -Djarmode=layertools -jar hft-app/target/hft-app-1.0.0-SNAPSHOT.jar extract --destination extracted
 
 # Stage 2: Runtime
-FROM eclipse-temurin:17-jre-jammy AS runtime
+FROM eclipse-temurin:21-jre-jammy AS runtime
 
 # Install performance tools
 RUN apt-get update && apt-get install -y \
@@ -67,14 +67,13 @@ COPY --from=builder --chown=hft:hft /app/extracted/application/ ./
 # Set user
 USER hft
 
-# JVM tuning for low-latency with Aeron compatibility
+# JVM tuning for low-latency with Aeron compatibility (Java 21 LTS)
 ENV JAVA_OPTS="-server \
     -XX:+UseG1GC \
     -XX:MaxGCPauseMillis=10 \
     -XX:+UseStringDeduplication \
     -XX:+AlwaysPreTouch \
     -XX:+DisableExplicitGC \
-    -XX:+ParallelRefProcEnabled \
     -Xms2g \
     -Xmx4g \
     -Djava.security.egd=file:/dev/./urandom \

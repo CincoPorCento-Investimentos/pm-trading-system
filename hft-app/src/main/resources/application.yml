@@ -24,7 +24,6 @@ spring:
       ddl-auto: validate
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
         jdbc:
           batch_size: 50
@@ -54,7 +53,8 @@ server:
     enabled: true
     mime-types: application/json,application/xml,text/html,text/xml,text/plain
   tomcat:
-    max-threads: 200
+    threads:
+      max: 200
     accept-count: 100
     max-connections: 10000
 
@@ -71,8 +71,9 @@ management:
   metrics:
     tags:
       application: ${spring.application.name}
-    export:
-      prometheus:
+  prometheus:
+    metrics:
+      export:
         enabled: true
 
 # HFT Configuration
@@ -127,8 +128,10 @@ logging:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
   file:
     name: ./logs/hft-trading.log
-    max-size: 100MB
-    max-history: 30
+  logback:
+    rollingpolicy:
+      max-file-size: 100MB
+      max-history: 30
 
 ---
 # Development Profile
