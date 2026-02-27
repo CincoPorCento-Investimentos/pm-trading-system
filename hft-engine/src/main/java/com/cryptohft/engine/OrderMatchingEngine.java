@@ -2,6 +2,7 @@ package com.cryptohft.engine;
 
 import com.cryptohft.common.domain.Order;
 import com.cryptohft.common.domain.Trade;
+import com.cryptohft.common.event.EventDispatcher;
 import com.cryptohft.common.util.IdGenerator;
 import com.cryptohft.common.util.NanoClock;
 import com.lmax.disruptor.RingBuffer;
@@ -21,6 +22,21 @@ import java.util.function.Consumer;
 /**
  * High-performance order matching engine using LMAX Disruptor pattern.
  * Supports price-time priority matching for limit orders.
+ *
+ * <h3>Architecture</h3>
+ * <p>Orders are submitted via {@link #submitOrder(Order)} and published to a
+ * LMAX Disruptor ring buffer. A single consumer thread processes events sequentially,
+ * which eliminates locking on the order book data structures.</p>
+ *
+ * <h3>Matching Algorithm</h3>
+ * <p>Uses <b>price-time priority</b>: orders at the best price are matched first;
+ * at the same price level, earlier orders (FIFO) are matched first.
+ * Trades execute at the <b>passive (resting) order's price</b>.</p>
+ *
+ * <h3>Price Representation</h3>
+ * <p>Prices are stored internally as {@code long} (price * 10^8) to avoid
+ * {@link BigDecimal} comparison overhead in the hot matching path. Conversion
+ * methods: {@code priceToLong()} / {@code longToPrice()}.</p>
  */
 @Slf4j
 public class OrderMatchingEngine implements AutoCloseable {
@@ -42,9 +58,9 @@ public class OrderMatchingEngine implements AutoCloseable {
     private final Disruptor<OrderEvent> disruptor;
     private final RingBuffer<OrderEvent> ringBuffer;
     
-    // Event handlers
-    private final List<Consumer<Trade>> tradeListeners = new ArrayList<>();
-    private final List<Consumer<Order>> orderUpdateListeners = new ArrayList<>();
+    // Event dispatchers
+    private final EventDispatcher<Trade> tradeDispatcher = new EventDispatcher<>("trade");
+    private final EventDispatcher<Order> orderUpdateDispatcher = new EventDispatcher<>("orderUpdate");
     
     // Price multiplier for integer arithmetic (8 decimal places)
     private static final long PRICE_MULTIPLIER = 100_000_000L;
@@ -185,7 +201,15 @@ public class OrderMatchingEngine implements AutoCloseable {
     }
     
     /**
-     * Match an order against the opposite side of the book.
+     * Match an aggressor order against the opposite side of the book.
+     *
+     * <p>Iterates price levels of the opposite book (best price first).
+     * For limit orders, stops when the opposite price is worse than the aggressor's limit.
+     * At each price level, matches against resting orders in FIFO order.
+     * Fully filled resting orders are removed from the book and index.</p>
+     *
+     * @param aggressor the incoming order to match
+     * @return remaining unfilled quantity of the aggressor
      */
     private BigDecimal matchOrder(OrderEntry aggressor) {
         TreeMap<Long, LinkedList<OrderEntry>> oppositeBook = 
@@ -254,9 +278,16 @@ public class OrderMatchingEngine implements AutoCloseable {
     }
     
     /**
-     * Execute a trade between two orders.
+     * Execute a trade between an aggressor and a passive (resting) order.
+     * Creates two Trade records (one per side) and notifies all trade listeners.
+     * The trade price is always the passive order's price (maker price).
+     *
+     * @param aggressor the incoming (taker) order
+     * @param passive   the resting (maker) order
+     * @param price     the execution price (passive order's price)
+     * @param quantity  the fill quantity
      */
-    private void executeTrade(OrderEntry aggressor, OrderEntry passive, 
+    private void executeTrade(OrderEntry aggressor, OrderEntry passive,
                               BigDecimal price, BigDecimal quantity) {
         long tradeId = idGenerator.nextId();
         long execNanos = NanoClock.nanoTime();
@@ -424,34 +455,22 @@ public class OrderMatchingEngine implements AutoCloseable {
      * Register a trade listener.
      */
     public void addTradeListener(Consumer<Trade> listener) {
-        tradeListeners.add(listener);
+        tradeDispatcher.addListener(listener);
     }
-    
+
     /**
      * Register an order update listener.
      */
     public void addOrderUpdateListener(Consumer<Order> listener) {
-        orderUpdateListeners.add(listener);
+        orderUpdateDispatcher.addListener(listener);
     }
-    
+
     private void notifyTrade(Trade trade) {
-        for (Consumer<Trade> listener : tradeListeners) {
-            try {
-                listener.accept(trade);
-            } catch (Exception e) {
-                log.error("Error notifying trade listener", e);
-            }
-        }
+        tradeDispatcher.dispatch(trade);
     }
-    
+
     private void notifyOrderUpdate(Order order) {
-        for (Consumer<Order> listener : orderUpdateListeners) {
-            try {
-                listener.accept(order);
-            } catch (Exception e) {
-                log.error("Error notifying order update listener", e);
-            }
-        }
+        orderUpdateDispatcher.dispatch(order);
     }
     
     private long priceToLong(BigDecimal price) {

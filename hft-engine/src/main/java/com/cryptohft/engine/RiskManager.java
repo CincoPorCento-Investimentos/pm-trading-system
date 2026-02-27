@@ -17,86 +17,98 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Real-time risk management for pre-trade and post-trade checks.
  * Performs ultra-low-latency risk checks before order submission.
+ *
+ * <p>Risk checks are executed in the following order (fail-fast):
+ * <ol>
+ *   <li>Circuit breaker - is trading globally enabled?</li>
+ *   <li>Order rate limit - orders per second threshold</li>
+ *   <li>Order size limits - min/max quantity</li>
+ *   <li>Notional value - price * quantity cap</li>
+ *   <li>Position limits - projected position after fill</li>
+ *   <li>Total exposure - aggregate notional across all positions</li>
+ *   <li>Daily loss limit - realized P&amp;L floor</li>
+ *   <li>Price deviation - limit order price vs reference price</li>
+ * </ol>
  */
 @Slf4j
 public class RiskManager {
-    
-    private final RiskConfig config;
+
+    private final RiskProperties config;
     private final Map<String, Position> positions = new Object2ObjectHashMap<>();
     private final Map<String, BigDecimal> orderExposure = new Object2ObjectHashMap<>();
-    
+
     // Circuit breaker
     private final AtomicBoolean tradingEnabled = new AtomicBoolean(true);
-    
+
     // Risk metrics
     private volatile BigDecimal totalPnl = BigDecimal.ZERO;
     private volatile BigDecimal dailyPnl = BigDecimal.ZERO;
     private volatile int orderCount = 0;
     private volatile int rejectCount = 0;
-    
-    public RiskManager(RiskConfig config) {
+
+    public RiskManager(RiskProperties config) {
         this.config = config;
         log.info("Risk manager initialized with config: {}", config);
     }
-    
+
     /**
      * Perform pre-trade risk check.
-     * Returns null if order passes, otherwise returns rejection reason.
+     * Returns a result indicating acceptance or rejection with specific violation details.
      */
     public RiskCheckResult checkOrder(Order order) {
         List<String> violations = new ArrayList<>();
-        
+
         // Check circuit breaker
         if (!tradingEnabled.get()) {
             return RiskCheckResult.reject("CIRCUIT_BREAKER", "Trading disabled by circuit breaker");
         }
-        
+
         // Check order rate limit
         if (orderCount >= config.getMaxOrdersPerSecond()) {
             violations.add("ORDER_RATE_LIMIT_EXCEEDED");
         }
-        
+
         // Check order size limits
         if (order.getQuantity().compareTo(config.getMaxOrderSize()) > 0) {
             violations.add("ORDER_SIZE_EXCEEDS_MAX: " + order.getQuantity() + " > " + config.getMaxOrderSize());
         }
-        
+
         if (order.getQuantity().compareTo(config.getMinOrderSize()) < 0) {
             violations.add("ORDER_SIZE_BELOW_MIN: " + order.getQuantity() + " < " + config.getMinOrderSize());
         }
-        
+
         // Check notional value
         BigDecimal notional = order.getPrice().multiply(order.getQuantity());
         if (notional.compareTo(config.getMaxOrderNotional()) > 0) {
             violations.add("ORDER_NOTIONAL_EXCEEDS_MAX: " + notional + " > " + config.getMaxOrderNotional());
         }
-        
+
         // Check position limits
         Position currentPosition = positions.get(order.getSymbol());
         BigDecimal currentQty = currentPosition != null ? currentPosition.getQuantity() : BigDecimal.ZERO;
         BigDecimal pendingExposure = orderExposure.getOrDefault(order.getSymbol(), BigDecimal.ZERO);
-        
+
         BigDecimal projectedPosition = currentQty
                 .add(order.getSide() == Order.Side.BUY ? order.getQuantity() : order.getQuantity().negate())
                 .add(pendingExposure);
-        
+
         if (projectedPosition.abs().compareTo(config.getMaxPositionSize()) > 0) {
             violations.add("POSITION_LIMIT_EXCEEDED: projected=" + projectedPosition + ", max=" + config.getMaxPositionSize());
         }
-        
+
         // Check total exposure
         BigDecimal totalExposure = calculateTotalExposure()
                 .add(notional);
-        
+
         if (totalExposure.compareTo(config.getMaxTotalExposure()) > 0) {
             violations.add("TOTAL_EXPOSURE_EXCEEDED: " + totalExposure + " > " + config.getMaxTotalExposure());
         }
-        
+
         // Check daily loss limit
         if (dailyPnl.compareTo(config.getMaxDailyLoss().negate()) < 0) {
             violations.add("DAILY_LOSS_LIMIT_EXCEEDED: " + dailyPnl);
         }
-        
+
         // Check price reasonability (if we have a reference price)
         if (currentPosition != null && order.getOrderType() == Order.OrderType.LIMIT) {
             BigDecimal refPrice = currentPosition.getAverageEntryPrice();
@@ -104,36 +116,46 @@ public class RiskManager {
                 BigDecimal deviation = order.getPrice().subtract(refPrice)
                         .divide(refPrice, 4, RoundingMode.HALF_UP)
                         .abs();
-                
+
                 if (deviation.compareTo(config.getMaxPriceDeviation()) > 0) {
                     violations.add("PRICE_DEVIATION_TOO_HIGH: " + deviation.multiply(BigDecimal.valueOf(100)) + "%");
                 }
             }
         }
-        
+
         if (!violations.isEmpty()) {
             rejectCount++;
             log.warn("Order rejected - orderId={}, violations={}", order.getOrderId(), violations);
             return RiskCheckResult.reject("RISK_CHECK_FAILED", String.join("; ", violations));
         }
-        
+
         orderCount++;
         return RiskCheckResult.accept();
     }
-    
+
     /**
      * Update position after trade execution.
+     *
+     * <p>Average price calculation:
+     * <ul>
+     *   <li>Adding to position: weighted average of existing + new trade</li>
+     *   <li>Reducing position: average price stays the same (only realized P&amp;L changes)</li>
+     *   <li>Flat position: average price resets to zero</li>
+     * </ul>
+     *
+     * <p>Realized P&amp;L is computed when reducing a position:
+     * {@code (tradePrice - avgEntryPrice) * reducedQty} (negated for short positions).
      */
-    public void updatePosition(String symbol, String account, Order.Side side, 
+    public void updatePosition(String symbol, String account, Order.Side side,
                                 BigDecimal quantity, BigDecimal price) {
         Position current = positions.get(symbol);
-        
+
         BigDecimal currentQty = current != null ? current.getQuantity() : BigDecimal.ZERO;
         BigDecimal currentAvgPrice = current != null ? current.getAverageEntryPrice() : BigDecimal.ZERO;
-        
+
         BigDecimal tradeQty = side == Order.Side.BUY ? quantity : quantity.negate();
         BigDecimal newQty = currentQty.add(tradeQty);
-        
+
         // Calculate new average price
         BigDecimal newAvgPrice;
         if (newQty.compareTo(BigDecimal.ZERO) == 0) {
@@ -148,7 +170,7 @@ public class RiskManager {
             // Reducing position
             newAvgPrice = currentAvgPrice;
         }
-        
+
         // Calculate realized PnL for position reduction
         BigDecimal realizedPnl = BigDecimal.ZERO;
         if (currentQty.abs().compareTo(newQty.abs()) > 0) {
@@ -160,7 +182,7 @@ public class RiskManager {
             totalPnl = totalPnl.add(realizedPnl);
             dailyPnl = dailyPnl.add(realizedPnl);
         }
-        
+
         Position newPosition = Position.builder()
                 .symbol(symbol)
                 .account(account)
@@ -168,13 +190,13 @@ public class RiskManager {
                 .averageEntryPrice(newAvgPrice)
                 .realizedPnl(realizedPnl)
                 .build();
-        
+
         positions.put(symbol, newPosition);
-        
+
         log.debug("Position updated: symbol={}, qty={}, avgPrice={}, realizedPnl={}",
                 symbol, newQty, newAvgPrice, realizedPnl);
     }
-    
+
     /**
      * Update pending order exposure.
      */
@@ -183,7 +205,7 @@ public class RiskManager {
         BigDecimal delta = side == Order.Side.BUY ? quantity : quantity.negate();
         orderExposure.put(symbol, current.add(delta));
     }
-    
+
     /**
      * Remove pending order exposure.
      */
@@ -192,7 +214,7 @@ public class RiskManager {
         BigDecimal delta = side == Order.Side.BUY ? quantity : quantity.negate();
         orderExposure.put(symbol, current.subtract(delta));
     }
-    
+
     /**
      * Enable trading (after circuit breaker recovery).
      */
@@ -200,7 +222,7 @@ public class RiskManager {
         tradingEnabled.set(true);
         log.info("Trading enabled");
     }
-    
+
     /**
      * Disable trading (trigger circuit breaker).
      */
@@ -208,7 +230,7 @@ public class RiskManager {
         tradingEnabled.set(false);
         log.warn("Trading disabled: {}", reason);
     }
-    
+
     /**
      * Reset daily metrics (call at start of trading day).
      */
@@ -218,14 +240,14 @@ public class RiskManager {
         rejectCount = 0;
         log.info("Daily risk metrics reset");
     }
-    
+
     /**
      * Get current position for a symbol.
      */
     public Position getPosition(String symbol) {
         return positions.get(symbol);
     }
-    
+
     /**
      * Calculate total exposure across all positions.
      */
@@ -234,7 +256,7 @@ public class RiskManager {
                 .map(p -> p.getNotionalValue() != null ? p.getNotionalValue() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
-    
+
     /**
      * Get risk statistics.
      */
@@ -249,7 +271,7 @@ public class RiskManager {
                 .positionCount(positions.size())
                 .build();
     }
-    
+
     /**
      * Risk check result.
      */
@@ -259,11 +281,11 @@ public class RiskManager {
         private final boolean accepted;
         private final String rejectCode;
         private final String rejectReason;
-        
+
         public static RiskCheckResult accept() {
             return RiskCheckResult.builder().accepted(true).build();
         }
-        
+
         public static RiskCheckResult reject(String code, String reason) {
             return RiskCheckResult.builder()
                     .accepted(false)
@@ -272,42 +294,7 @@ public class RiskManager {
                     .build();
         }
     }
-    
-    /**
-     * Risk configuration.
-     */
-    @Data
-    @Builder
-    public static class RiskConfig {
-        @Builder.Default
-        private BigDecimal maxOrderSize = new BigDecimal("1000");
-        
-        @Builder.Default
-        private BigDecimal minOrderSize = new BigDecimal("0.001");
-        
-        @Builder.Default
-        private BigDecimal maxOrderNotional = new BigDecimal("1000000");
-        
-        @Builder.Default
-        private BigDecimal maxPositionSize = new BigDecimal("10000");
-        
-        @Builder.Default
-        private BigDecimal maxTotalExposure = new BigDecimal("10000000");
-        
-        @Builder.Default
-        private BigDecimal maxDailyLoss = new BigDecimal("100000");
-        
-        @Builder.Default
-        private BigDecimal maxPriceDeviation = new BigDecimal("0.10"); // 10%
-        
-        @Builder.Default
-        private int maxOrdersPerSecond = 100;
-        
-        public static RiskConfig defaultConfig() {
-            return RiskConfig.builder().build();
-        }
-    }
-    
+
     /**
      * Risk statistics.
      */

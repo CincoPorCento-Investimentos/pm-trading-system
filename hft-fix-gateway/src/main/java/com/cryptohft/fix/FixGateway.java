@@ -2,6 +2,7 @@ package com.cryptohft.fix;
 
 import com.cryptohft.common.domain.Order;
 import com.cryptohft.common.domain.Trade;
+import com.cryptohft.common.event.EventDispatcher;
 import com.cryptohft.common.util.IdGenerator;
 import com.cryptohft.common.util.NanoClock;
 import lombok.extern.slf4j.Slf4j;
@@ -16,8 +17,6 @@ import quickfix.fix44.OrderCancelRequest;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -36,10 +35,10 @@ public class FixGateway implements Application {
     private final Map<String, Order> pendingOrders = new ConcurrentHashMap<>();
     private final Map<String, String> clOrdIdToOrderId = new ConcurrentHashMap<>();
     
-    // Event listeners
-    private final List<Consumer<Order>> orderUpdateListeners = new ArrayList<>();
-    private final List<Consumer<Trade>> tradeListeners = new ArrayList<>();
-    private final List<Consumer<Boolean>> connectionListeners = new ArrayList<>();
+    // Event dispatchers
+    private final EventDispatcher<Order> orderUpdateDispatcher = new EventDispatcher<>("fixOrderUpdate");
+    private final EventDispatcher<Trade> tradeDispatcher = new EventDispatcher<>("fixTrade");
+    private final EventDispatcher<Boolean> connectionDispatcher = new EventDispatcher<>("fixConnection");
     
     private volatile boolean connected = false;
     private SocketInitiator initiator;
@@ -167,21 +166,21 @@ public class FixGateway implements Application {
      * Add order update listener.
      */
     public void addOrderUpdateListener(Consumer<Order> listener) {
-        orderUpdateListeners.add(listener);
+        orderUpdateDispatcher.addListener(listener);
     }
-    
+
     /**
      * Add trade listener.
      */
     public void addTradeListener(Consumer<Trade> listener) {
-        tradeListeners.add(listener);
+        tradeDispatcher.addListener(listener);
     }
-    
+
     /**
      * Add connection listener.
      */
     public void addConnectionListener(Consumer<Boolean> listener) {
-        connectionListeners.add(listener);
+        connectionDispatcher.addListener(listener);
     }
     
     /**
@@ -419,32 +418,14 @@ public class FixGateway implements Application {
     }
     
     private void notifyOrderUpdateListeners(Order order) {
-        for (Consumer<Order> listener : orderUpdateListeners) {
-            try {
-                listener.accept(order);
-            } catch (Exception e) {
-                log.error("Error in order update listener", e);
-            }
-        }
+        orderUpdateDispatcher.dispatch(order);
     }
-    
+
     private void notifyTradeListeners(Trade trade) {
-        for (Consumer<Trade> listener : tradeListeners) {
-            try {
-                listener.accept(trade);
-            } catch (Exception e) {
-                log.error("Error in trade listener", e);
-            }
-        }
+        tradeDispatcher.dispatch(trade);
     }
-    
+
     private void notifyConnectionListeners(boolean connected) {
-        for (Consumer<Boolean> listener : connectionListeners) {
-            try {
-                listener.accept(connected);
-            } catch (Exception e) {
-                log.error("Error in connection listener", e);
-            }
-        }
+        connectionDispatcher.dispatch(connected);
     }
 }

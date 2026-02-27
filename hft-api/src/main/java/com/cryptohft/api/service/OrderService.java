@@ -3,6 +3,8 @@ package com.cryptohft.api.service;
 import com.cryptohft.api.dto.OrderRequest;
 import com.cryptohft.api.dto.OrderResponse;
 import com.cryptohft.common.domain.Order;
+import com.cryptohft.common.exception.InvalidOrderStateException;
+import com.cryptohft.common.exception.OrderNotFoundException;
 import com.cryptohft.common.util.IdGenerator;
 import com.cryptohft.common.util.NanoClock;
 import com.cryptohft.engine.OrderMatchingEngine;
@@ -123,19 +125,18 @@ public class OrderService {
     
     /**
      * Cancel an order.
+     *
+     * @throws OrderNotFoundException if the order does not exist
+     * @throws InvalidOrderStateException if the order is not in a cancellable state
      */
     @Transactional
     public OrderResponse cancelOrder(String orderId, String symbol) {
-        OrderEntity entity = orderRepository.findById(orderId).orElse(null);
-        
-        if (entity == null) {
-            return OrderResponse.error("ORDER_NOT_FOUND", "Order not found: " + orderId);
-        }
-        
-        if (!entity.getStatus().equals(Order.OrderStatus.NEW) && 
+        OrderEntity entity = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
+
+        if (!entity.getStatus().equals(Order.OrderStatus.NEW) &&
             !entity.getStatus().equals(Order.OrderStatus.PARTIALLY_FILLED)) {
-            return OrderResponse.error("INVALID_ORDER_STATE", 
-                    "Cannot cancel order in state: " + entity.getStatus());
+            throw new InvalidOrderStateException(orderId, entity.getStatus().name(), "cancel");
         }
         
         // Remove pending exposure
@@ -183,11 +184,13 @@ public class OrderService {
     
     /**
      * Get order by ID.
+     *
+     * @throws OrderNotFoundException if the order does not exist
      */
     public OrderResponse getOrder(String orderId) {
         return orderRepository.findById(orderId)
                 .map(entity -> OrderResponse.fromOrder(entity.toDomain()))
-                .orElse(null);
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
     }
     
     /**

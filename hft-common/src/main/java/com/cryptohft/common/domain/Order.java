@@ -10,6 +10,22 @@ import java.time.Instant;
 /**
  * Core order domain model for the HFT system.
  * Designed for low-latency with primitive-friendly fields where possible.
+ *
+ * <h3>Order Lifecycle State Machine</h3>
+ * <pre>
+ *   PENDING_NEW ──→ NEW ──→ PARTIALLY_FILLED ──→ FILLED
+ *                    │
+ *                    ├──→ CANCELLED
+ *                    │
+ *                    └──→ REJECTED
+ *
+ *   PENDING_CANCEL ──→ CANCELLED
+ *
+ *   Any active state ──→ EXPIRED (for DAY/GTD orders)
+ * </pre>
+ *
+ * <p>Active states: {@code PENDING_NEW, NEW, PARTIALLY_FILLED}<br>
+ * Terminal states: {@code FILLED, CANCELLED, REJECTED, EXPIRED}</p>
  */
 @Data
 @Builder
