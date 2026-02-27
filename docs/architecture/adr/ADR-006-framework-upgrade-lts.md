@@ -138,3 +138,14 @@ Agrona 2.x tem breaking changes (`UnsafeAccess` removido, `MemoryAccess` removid
 - **Agrona 2.x**: Conflito de classpath com `aeron-all` que bundla Agrona 1.x
 - **Upgrade incremental**: Desnecessário — sem produção, sem risco de downtime
 - **Manter Java 17**: Perder Virtual Threads, melhorias de GC e 6% de performance
+
+---
+
+## Roadmap Futuro
+
+| Quando | O Que | Por Que |
+|---|---|---|
+| **Próximo Sprint** | Habilitar Virtual Threads para WebSocket connections | Simplifica modelo de threading, melhor throughput I/O |
+| **Q2 2026** | Avaliar Generational ZGC como alternativa ao G1 | Latência de GC potencialmente menor para heaps grandes |
+| **Após Jun/2026** | Migrar para Spring Boot 4.0.x | 3.5 vai EOL. Jackson 3 migration será necessária |
+| **Quando disponível** | QuickFIX/J 3.0 GA + Spring Boot 4.0 | Compatibilidade completa com Jackson 3.x |
