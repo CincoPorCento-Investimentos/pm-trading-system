@@ -12,7 +12,7 @@ Construir uma aplicacao companheira que monitora o pm-trading-system via checks 
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation** - Modulo Maven, modelos base e configuracao externalizada
+- [x] **Phase 1: Foundation** - Modulo Maven, modelos base e configuracao externalizada
 - [ ] **Phase 2: Clients** - HTTP client (RestClient) e WebSocket client para comunicacao com o target
 - [ ] **Phase 3: Health & Order Checks** - Checks de health, metricas e todo o ciclo de ordens
 - [ ] **Phase 4: WebSocket Check** - Check completo de WebSocket (ping/pong, subscribe, mensagem invalida)
@@ -33,9 +33,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Module scaffolding + Spring Boot entry point (Wave 1)
-- [ ] 01-02-PLAN.md — Base models: Status, CheckStep, CheckResult, SyntheticCheck (Wave 2)
-- [ ] 01-03-PLAN.md — Configuration properties: MonitoringProperties (Wave 2)
+- [x] 01-01-PLAN.md — Module scaffolding + Spring Boot entry point (Wave 1)
+- [x] 01-02-PLAN.md — Base models: Status, CheckStep, CheckResult, SyntheticCheck (Wave 2)
+- [x] 01-03-PLAN.md — Configuration properties: MonitoringProperties (Wave 2)
 
 ### Phase 2: Clients
 **Goal**: Clients HTTP e WebSocket funcionais que conseguem se comunicar com o hft-app, servindo como fundacao para todos os checks
@@ -123,7 +123,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 (and 4 in parallel if desired) -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/3 | Not started | - |
+| 1. Foundation | 3/3 | Complete | 2026-02-28 |
 | 2. Clients | 0/2 | Not started | - |
 | 3. Health & Order Checks | 0/3 | Not started | - |
 | 4. WebSocket Check | 0/1 | Not started | - |

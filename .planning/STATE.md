@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-02-28T04:11:12.641Z"
+last_updated: "2026-02-28T04:11:59.225Z"
 progress:
   total_phases: 1
   completed_phases: 1
@@ -47,6 +47,7 @@ Progress: [██░░░░░░░░] 17%
 - Trend: stable
 
 *Updated after each plan completion*
+| Phase 01-foundation P02 | 2min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -63,6 +64,9 @@ Recent decisions affecting current work:
 - Module hft-synthetic-monitoring fully independent, zero internal deps
 - [Phase 01-foundation]: @Data (Lombok) for config classes -- Spring binding requires setters, @Value immutable
 - [Phase 01-foundation]: Nested config with new instance defaults for null-safe access
+- [Phase 01-foundation]: SyntheticCheck uses methods instead of annotations -- avoids reflection
+- [Phase 01-foundation]: CheckResult.steps uses List.copyOf for thread-safe immutability
+- [Phase 01-foundation]: Static factory methods (ok/warn/fail) on records instead of builders
 
 ### Pending Todos
 
