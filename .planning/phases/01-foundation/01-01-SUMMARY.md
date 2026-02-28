@@ -31,7 +31,7 @@ key-files:
 key-decisions:
   - "Module fully independent with zero internal deps (no hft-common, hft-api, etc.)"
   - "Port 8081 to avoid conflict with hft-app on 8080"
-  - "Actuator exposes health, info, metrics, prometheus endpoints with show-details: always"
+  - "Actuator exposes health, info, metrics, prometheus endpoints with show-details: never"
 
 patterns-established:
   - "Independent companion module: separate Spring Boot app with own port and lifecycle"
@@ -57,6 +57,7 @@ completed: 2026-02-28
 - **Files modified:** 5
 
 ## Accomplishments
+
 - Maven module hft-synthetic-monitoring registered in root pom.xml (modules + dependencyManagement)
 - Spring Boot application with @EnableScheduling ready for scheduled checks
 - Actuator configured with health, info, metrics, prometheus endpoints
@@ -71,6 +72,7 @@ Each task was committed atomically:
 2. **Task 2: Create Spring Boot application entry point, configuration and smoke tests** - `59fb93b` (feat)
 
 ## Files Created/Modified
+
 - `pom.xml` - Added module declaration and dependencyManagement entry for hft-synthetic-monitoring
 - `hft-synthetic-monitoring/pom.xml` - Module POM with Spring Boot web, actuator, micrometer-prometheus, Java-WebSocket, lombok deps and spring-boot-maven-plugin
 - `hft-synthetic-monitoring/src/main/java/com/cryptohft/monitoring/SyntheticMonitoringApplication.java` - Entry point with @SpringBootApplication, @EnableScheduling, @Slf4j, startup log
@@ -78,15 +80,17 @@ Each task was committed atomically:
 - `hft-synthetic-monitoring/src/test/java/com/cryptohft/monitoring/SyntheticMonitoringApplicationTest.java` - Smoke tests: contextLoads and actuatorHealthRespondsUp
 
 ## Decisions Made
+
 - Module fully independent with zero internal dependencies -- keeps synthetic monitoring decoupled from the trading platform
 - Port 8081 avoids conflict with hft-app on 8080
-- Actuator exposes health, info, metrics, prometheus with show-details: always for operational visibility
+- Actuator exposes health, info, metrics, prometheus with show-details: never for operational visibility
 
 ## Deviations from Plan
 
 None - plan executed exactly as written.
 
 ## Issues Encountered
+
 - Java/Maven not installed in execution environment -- automated verification commands (mvn compile, mvn test) could not run. Files are structurally correct (standard Spring Boot boilerplate following existing hft-app patterns). Manual verification needed on a Java 21 + Maven environment.
 
 ## User Setup Required
@@ -94,6 +98,7 @@ None - plan executed exactly as written.
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - Module scaffold complete, ready for Plan 01-02 (models: SyntheticCheck, CheckResult, CheckStep) and Plan 01-03 (MonitoringProperties configuration binding)
 - Application.yml already contains the full synthetic-monitoring config block that Plan 01-03 will bind via @ConfigurationProperties
 

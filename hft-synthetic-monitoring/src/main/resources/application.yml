@@ -5,10 +5,10 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
+        include: health,prometheus
   endpoint:
     health:
-      show-details: always
+      show-details: never
 
 # Synthetic monitoring configuration - bound to MonitoringProperties (Plan 01-03)
 synthetic-monitoring:

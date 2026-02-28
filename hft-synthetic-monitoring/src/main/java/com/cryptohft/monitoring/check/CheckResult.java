@@ -12,7 +12,7 @@ public record CheckResult(
         List<CheckStep> steps) {
 
     public CheckResult {
-        steps = List.copyOf(steps);
+        steps = steps == null ? List.of() : List.copyOf(steps);
     }
 
     public static CheckResult ok(String checkName, String message, long durationMs, List<CheckStep> steps) {

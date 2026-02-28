@@ -51,8 +51,8 @@ Detectar deploys quebrados imediatamente atraves de checks sinteticos continuos,
 
 ## Context
 
-O pm-trading-system e um sistema HFT critico com 9 modulos Maven (Java 21, Spring Boot 3.5.11):
-- hft-common, hft-sbe, hft-aeron, hft-engine, hft-market-data, hft-fix-gateway, hft-api, hft-persistence, hft-app
+O pm-trading-system e um sistema HFT critico com 10 modulos Maven (Java 21, Spring Boot 3.5.11):
+- hft-common, hft-sbe, hft-aeron, hft-engine, hft-market-data, hft-fix-gateway, hft-api, hft-persistence, hft-app, hft-synthetic-monitoring
 - API REST em `/api/v1/orders` (submit, query, cancel, batch-cancel, cancel-all)
 - WebSocket em `ws://localhost:8080/ws/trading` (subscribe, marketdata, orders, trades)
 - Actuator expondo health, metrics, prometheus
@@ -69,6 +69,7 @@ O documento de arquitetura `docs/architecture/10-synthetic-monitoring.md` contem
 - Ordem de implementacao sugerida (18 steps)
 
 ### Decisoes ja tomadas no doc:
+
 - RestClient (Spring 6.1+) para HTTP client — leve, sem deps extras
 - Java-WebSocket 1.6.0 para WS client
 - Ordens sinteticas com quantity=0.001, price=100.00 (notional=0.10, muito abaixo do limite de risco)
