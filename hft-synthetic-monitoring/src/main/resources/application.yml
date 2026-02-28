@@ -1,0 +1,29 @@
+server:
+  port: 8081
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+# Synthetic monitoring configuration - bound to MonitoringProperties (Plan 01-03)
+synthetic-monitoring:
+  interval-ms: 30000
+  timeout-ms: 3000
+  target:
+    base-url: http://localhost:8080
+    ws-url: ws://localhost:8080/ws/trading
+  order:
+    symbol: BTCUSD
+    price: 100.00
+    quantity: 0.001
+    account: SM_CHECK
+    client-id-prefix: sm-
+  alert:
+    consecutive-failures-threshold: 3
+    warn-threshold: 5
+    webhook-url: ""
