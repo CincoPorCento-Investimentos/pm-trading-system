@@ -5,7 +5,7 @@
 
 ---
 
-### 🎯 O que foi feito?
+## 🎯 O que foi feito?
 
 <!--
 📝 Como preencher:
@@ -19,7 +19,7 @@
 
 ---
 
-### 🚀 Valor Gerado
+## 🚀 Valor Gerado
 
 <!--
 📝 Como preencher:
@@ -37,7 +37,7 @@
 
 ---
 
-### 📋 Mudanças Principais
+## 📋 Mudanças Principais
 
 <!--
 📝 Como preencher:
@@ -54,15 +54,15 @@
   - Componente `<DepositForm />` com feedback em tempo real
 -->
 
-#### 1️⃣ [Emoji + Categoria]
+### 1️⃣ [Emoji + Categoria]
 
-#### 2️⃣ [Emoji + Categoria]
+### 2️⃣ [Emoji + Categoria]
 
-#### 3️⃣ [Emoji + Categoria]
+### 3️⃣ [Emoji + Categoria]
 
 ---
 
-### 💡 Por que essa abordagem?
+## 💡 Por que essa abordagem?
 
 <!--
 📝 Como preencher:
@@ -81,7 +81,7 @@
 
 ---
 
-### ✅ O que não mudou?
+## ✅ O que não mudou?
 
 <!--
 📝 Como preencher:
@@ -97,7 +97,7 @@
 
 ---
 
-### 🔍 Como Revisar?
+## 🔍 Como Revisar?
 
 <!--
 📝 Como preencher:
@@ -118,7 +118,7 @@
 
 ---
 
-### 📊 Estatísticas
+## 📊 Estatísticas
 
 <!--
 📝 Como preencher:
@@ -134,7 +134,7 @@
 
 ---
 
-### 🧪 Testes
+## 🧪 Testes
 
 <!--
 📝 Como preencher:
