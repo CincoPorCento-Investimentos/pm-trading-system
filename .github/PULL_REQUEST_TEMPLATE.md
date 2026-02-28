@@ -1,4 +1,4 @@
-## 📚 [Título descritivo da mudança]
+# 📚 [Título descritivo da mudança]
 
 > 🏷️ **Tipo:** `feature` | `fix` | `refactor` | `docs` | `chore`
 > 🔗 **Issue:** #
