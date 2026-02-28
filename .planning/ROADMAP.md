@@ -30,12 +30,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. `SyntheticMonitoringApplication` sobe na porta 8081 e responde em /actuator/health com status UP
   3. `MonitoringProperties` carrega todos os parametros do application.yml (target URL, interval, order params, alert threshold)
   4. `SyntheticCheck` interface, `CheckResult` e `CheckStep` records existem com status OK/FAIL/WARN e podem ser instanciados
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
-- [ ] 01-03: TBD
+- [ ] 01-01-PLAN.md — Module scaffolding + Spring Boot entry point (Wave 1)
+- [ ] 01-02-PLAN.md — Base models: Status, CheckStep, CheckResult, SyntheticCheck (Wave 2)
+- [ ] 01-03-PLAN.md — Configuration properties: MonitoringProperties (Wave 2)
 
 ### Phase 2: Clients
 **Goal**: Clients HTTP e WebSocket funcionais que conseguem se comunicar com o hft-app, servindo como fundacao para todos os checks
