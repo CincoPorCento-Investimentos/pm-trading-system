@@ -10,7 +10,7 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Core Infrastructure
 
 - [x] **CORE-01**: Modulo Maven `hft-synthetic-monitoring` com pom.xml, package structure e entry point Spring Boot
-- [ ] **CORE-02**: Configuracao externalizada via `MonitoringProperties` (@ConfigurationProperties) com todos os parametros do application.yml
+- [x] **CORE-02**: Configuracao externalizada via `MonitoringProperties` (@ConfigurationProperties) com todos os parametros do application.yml
 - [ ] **CORE-03**: `CheckScheduler` que orquestra todos os checks periodicamente via @Scheduled (intervalo configuravel, default 30s)
 - [ ] **CORE-04**: Modelos base `SyntheticCheck` (interface), `CheckResult` (record) e `CheckStep` (record) com status OK/FAIL/WARN
 - [ ] **CORE-05**: `CheckReporter` que consolida resultados de todos os checks e reporta
@@ -102,7 +102,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | CORE-01 | Phase 1 | Complete |
-| CORE-02 | Phase 1 | Pending |
+| CORE-02 | Phase 1 | Complete |
 | CORE-03 | Phase 5 | Pending |
 | CORE-04 | Phase 1 | Pending |
 | CORE-05 | Phase 5 | Pending |
