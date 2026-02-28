@@ -19,6 +19,7 @@ In addition, the platform may evolve toward a multi-process deployment where mar
 Use **Aeron** as the messaging transport layer, with **Aeron IPC** (shared memory) for in-process communication and **Aeron UDP** for cross-process or cross-host messaging.
 
 **Configuration:**
+
 - IPC channel: `aeron:ipc` (shared memory at `/dev/shm/aeron-hft`)
 - Term buffer size: 64 MB
 - Window length: 1 MB
@@ -66,16 +67,19 @@ Use **Aeron** as the messaging transport layer, with **Aeron IPC** (shared memor
 ## Consequences
 
 **Positive:**
+
 - Sub-microsecond IPC for market data and order event delivery
 - Decoupling: producers and consumers don't need direct references to each other
 - Path to multi-process deployment: switch `aeron:ipc` to `aeron:udp` without code changes
 
 **Negative:**
+
 - Aeron MediaDriver adds operational complexity (shared memory directory, cleanup on startup)
 - Requires `IPC_LOCK` kernel capability to lock shared memory pages
 - Aeron conductor/sender/receiver threads consume CPU even when idle
 
 **Mitigations:**
+
 - `cleanupOnStart: true` ensures stale media driver state is removed
 - Container configured with `privileged: true` and appropriate ulimits
 - Aeron is optional — the platform falls back to direct method calls if `hft.aeron.enabled=false`

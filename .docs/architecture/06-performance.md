@@ -137,6 +137,7 @@ finally { book.lock.unlockWrite(stamp); }
 ```
 
 **Why StampedLock over synchronized/ReentrantLock?**
+
 - Optimistic reads avoid lock acquisition entirely in the common case
 - Writers still get exclusive access
 - No reader-writer starvation issues
@@ -187,6 +188,7 @@ finally { book.lock.unlockWrite(stamp); }
 
 **Why not ZGC or Shenandoah?**
 G1GC with a 10ms target is sufficient for this architecture because:
+
 - Matching engine uses off-heap memory (not subject to GC)
 - Aeron/SBE operate on DirectBuffer (off-heap)
 - The only GC pressure is from API request handling (REST DTOs)
@@ -244,6 +246,7 @@ Controls how Aeron threads behave when there is no work to do:
 | `BACK_OFF` | Adaptive | Adaptive | General purpose |
 
 **Config:**
+
 ```yaml
 hft:
   aeron:

@@ -117,6 +117,7 @@ classDiagram
 ```
 
 **Key design choices:**
+
 - `Order` is immutable — `@With` generates functional update copies
 - `OrderBook` uses `StampedLock` for optimistic lock-free reads
 - Prices stored as `long` (×10⁸) internally for integer arithmetic; `BigDecimal` on the boundary
@@ -230,6 +231,7 @@ graph LR
 | `level2` | Book changes | `OrderBook.update()` |
 
 ### Connection Management
+
 - Heartbeat every 30 seconds (exchange-specific ping)
 - Auto-reconnect after 5 seconds on disconnect
 - Re-subscribes to all configured symbols on reconnect
@@ -312,6 +314,7 @@ graph TD
 ### WebSocket Message Protocol
 
 **Client → Server:**
+
 ```json
 {"type": "subscribe", "channel": "marketdata", "symbol": "BTCUSDT"}
 {"type": "subscribe", "channel": "orders", "account": "DEFAULT"}
@@ -321,6 +324,7 @@ graph TD
 ```
 
 **Server → Client:**
+
 ```json
 {"type": "marketdata", "symbol": "BTCUSDT", "data": {...}, "timestamp": 1234567890}
 {"type": "order", "account": "DEFAULT", "data": {...}, "timestamp": 1234567890}
@@ -367,6 +371,7 @@ graph LR
 | 1003 | Execution reports | Engine → Gateway/API |
 
 **Channel types:**
+
 - `aeron:ipc` — in-process (zero-copy shared memory)
 - `aeron:udp` — cross-process / cross-host UDP multicast
 
@@ -390,6 +395,7 @@ SBE (Simple Binary Encoding) defines fixed-width binary message layouts for zero
 | `PositionUpdate` | 10 | Engine → consumers | symbol, account, quantity, avgPrice, pnl |
 
 **Custom types:**
+
 - `decimal`: `int64` mantissa + `int8` exponent
 - `timestamp`: `int64` nanoseconds since epoch
 - `varStringEncoding`: variable-length UTF-8 string
@@ -414,6 +420,7 @@ graph LR
 ### Repository Capabilities
 
 **OrderRepository:**
+
 - `findById`, `findByClientOrderId`
 - `findBySymbol`, `findByAccount`, `findByStatus`
 - `findOpenOrders()`, `findOpenOrdersBySymbol()`, `findOpenOrdersByAccount()`
@@ -422,6 +429,7 @@ graph LR
 - Cleanup: `deleteOldOrders(timestamp)` — removes terminated orders older than cutoff
 
 **Performance:**
+
 - HikariCP pool: 5 min idle / 20 max connections
 - Batch size: 50 (Hibernate `jdbc.batch_size`)
 - Indexed columns on all filter fields

@@ -64,6 +64,7 @@ RISK_MAX_POSITION_SIZE: 10000
 A single `AtomicBoolean` flag. When set to `false`, **all** new orders are rejected immediately.
 
 **Triggers (manual or automated):**
+
 - System operator manually disables via admin endpoint
 - Daily loss limit breached (auto-disable)
 - Exchange connectivity lost (optional auto-disable)
@@ -87,6 +88,7 @@ Uses token bucket algorithm. Tracks per-account rate in `AtomicLong` counters.
 ### 3 & 4. Order Size Limits
 
 Simple range check:
+
 ```
 minOrderSize ≤ order.quantity ≤ maxOrderSize
 ```
@@ -177,6 +179,7 @@ Reducing position (opposite side):
 ### Unrealized P&L
 
 Calculated on demand using the latest market data:
+
 ```
 unrealizedPnl = (currentMarketPrice - avgEntryPrice) × openQuantity  [LONG]
 unrealizedPnl = (avgEntryPrice - currentMarketPrice) × openQuantity  [SHORT]

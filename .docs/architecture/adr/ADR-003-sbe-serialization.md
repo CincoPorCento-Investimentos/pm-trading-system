@@ -9,6 +9,7 @@
 ## Context
 
 Messages exchanged between system components (market data, orders, executions) must be serialized for Aeron transport. The serialization format directly impacts:
+
 - **Throughput**: How many messages per second can be processed
 - **Latency**: Serialization/deserialization adds to end-to-end message latency
 - **Memory**: Object allocation during encoding contributes to GC pressure
@@ -62,12 +63,14 @@ SBE is used to generate Java codecs from XML schema definitions at build time (`
 ## Consequences
 
 **Positive:**
+
 - Zero heap allocation in message encoding/decoding hot path
 - Message parse time in the 10–50 ns range
 - Type-safe generated codecs eliminate manual parsing errors
 - Minimal wire size reduces Aeron buffer pressure
 
 **Negative:**
+
 - SBE messages are not human-readable (binary format requires tooling to inspect)
 - Schema changes require regenerating codecs and redeploying all consumers
 - Variable-length string fields (`varStringEncoding`) require sequential access (can't random-seek past them)

@@ -11,6 +11,7 @@
 A plataforma Crypto HFT estava rodando com **Spring Boot 3.2.1 (EOL)**, **Java 17**, e diversas dependências desatualizadas. Com o sistema ainda **não em produção**, havia uma janela ideal para atualizar tudo de uma vez antes do lançamento, eliminando débito técnico acumulado e voltando a receber security patches.
 
 Problemas identificados:
+
 - **Spring Boot 3.2.1**: End-of-life, sem security patches
 - **Java 17**: Sem acesso a Virtual Threads, Pattern Matching, Generational ZGC
 - **Netty 4.1.104**: 14 releases de security/performance patches pendentes
@@ -24,6 +25,7 @@ Problemas identificados:
 Atualizar **todos os frameworks** para as versões mais recentes estáveis (LTS), com as seguintes escolhas-chave:
 
 ### Core Platform
+
 | Componente | Antes | Depois |
 |---|---|---|
 | **Java** | 17 | **21 (LTS)** |
@@ -32,6 +34,7 @@ Atualizar **todos os frameworks** para as versões mais recentes estáveis (LTS)
 | **PostgreSQL (Docker)** | 15-alpine | **17-alpine** |
 
 ### High-Performance Trading Stack
+
 | Componente | Antes | Depois |
 |---|---|---|
 | **Aeron** | 1.42.1 | **1.46.7** |
@@ -42,6 +45,7 @@ Atualizar **todos os frameworks** para as versões mais recentes estáveis (LTS)
 | **Chronicle Queue** | 5.24.60 | **5.27.3** |
 
 ### Utilities & Testing
+
 | Componente | Antes | Depois |
 |---|---|---|
 | **PostgreSQL JDBC** | 42.7.1 | **42.7.5** |
@@ -53,6 +57,7 @@ Atualizar **todos os frameworks** para as versões mais recentes estáveis (LTS)
 | **Maven Compiler** | 3.11.0 | **3.13.0** |
 
 ### Dependências Removidas
+
 | Dependência | Motivo |
 |---|---|
 | **JUnit 4** (4.13.2) | TestContainers 1.20+ não precisa |
@@ -64,16 +69,19 @@ Atualizar **todos os frameworks** para as versões mais recentes estáveis (LTS)
 ### Mudanças em Configuração
 
 **application.yml:**
+
 - Removido `hibernate.dialect` (auto-detectado em Hibernate 6.4+)
 - `server.tomcat.max-threads` → `server.tomcat.threads.max`
 - `logging.file.*` → `logging.logback.rollingpolicy.*`
 - `management.metrics.export.prometheus` → `management.prometheus.metrics.export`
 
 **Dockerfile:**
+
 - Base images para `eclipse-temurin:21-jdk/jre-jammy`
 - Removido `-XX:+ParallelRefProcEnabled` (default em Java 21)
 
 **docker-compose.yml:**
+
 - PostgreSQL `15-alpine` → `17-alpine`
 
 ---
@@ -83,12 +91,14 @@ Atualizar **todos os frameworks** para as versões mais recentes estáveis (LTS)
 ### Por que Spring Boot 3.5.11 e não 4.0.3?
 
 Spring Boot 4.0 usa **Jackson 3.x** que troca o namespace de `com.fasterxml.jackson` → `tools.jackson`. Isso quebraria:
+
 1. **Parsing JSON de market data** — Binance/Coinbase WebSocket messages
 2. **QuickFIX/J 2.3.2** — incompatível com Jackson 3 (QuickFIX/J 3.0 ainda é SNAPSHOT)
 3. **Chronicle Queue** — não testado com Spring Framework 7
 4. **JUnit 6** — annotations e lifecycle methods diferentes
 
 Spring Boot **3.5.11** é a escolha correta porque:
+
 - É o bridge release oficial para 4.0 (depreca tudo que será removido)
 - Suportado até Jun/2026
 - Estável e maduro (11 patch releases)
@@ -103,17 +113,20 @@ Agrona 2.x tem breaking changes (`UnsafeAccess` removido, `MemoryAccess` removid
 ## Consequences
 
 **Positive:**
+
 - **Performance**: Java 21 traz ~6% de melhoria geral, Virtual Threads disponíveis, G1 GC melhorado
 - **Segurança**: Voltamos a receber security patches (Spring Boot, Netty, JDBC, QuickFIX/J)
 - **Produtividade**: Record Patterns, Pattern Matching for switch, Sequenced Collections
 - **Operacional**: PostgreSQL 17 com vacuum 20x mais eficiente, 2x write throughput
 
 **Negative:**
+
 - Regressão de latência potencial no hot path (Aeron IPC, matching engine) — requer benchmark JMH
 - `--add-opens` flags necessárias com Java 21 (strong encapsulation)
 - Chronicle Queue 5.27 pode ter formato de persistência diferente (sem impacto — não há dados em produção)
 
 **Trade-offs accepted:**
+
 - Spring Boot 3.5 em vez de 4.0: estabilidade do ecossistema sobre features mais recentes
 - Agrona 1.x em vez de 2.x: compatibilidade com Aeron sobre APIs mais modernas
 - Upgrade massivo em vez de incremental: justificado por não ter produção ainda

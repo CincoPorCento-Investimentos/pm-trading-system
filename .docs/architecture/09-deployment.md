@@ -100,6 +100,7 @@ JAVA_OPTS="-server \
 ```
 
 > For maximum performance with dedicated cores, add:
+>
 > ```
 > -XX:+UseNUMA
 > -XX:+UseLargePages

@@ -150,6 +150,7 @@ Dashboards are auto-provisioned from `./monitoring/grafana/dashboards/`.
 ### Recommended Dashboard Panels
 
 **Trading Overview:**
+
 - Order submission rate (orders/sec)
 - Trade execution rate (trades/sec)
 - Risk rejection rate
@@ -157,11 +158,13 @@ Dashboards are auto-provisioned from `./monitoring/grafana/dashboards/`.
 - Match latency histogram (p50, p95, p99)
 
 **Position Monitor:**
+
 - P&L by symbol (time series)
 - Daily P&L gauge
 - Open position size by symbol
 
 **System Health:**
+
 - JVM heap usage
 - GC pause duration
 - Thread count
@@ -169,6 +172,7 @@ Dashboards are auto-provisioned from `./monitoring/grafana/dashboards/`.
 - CPU usage
 
 **Market Data:**
+
 - Ticks received per second by symbol
 - WebSocket session count
 - Market data latency

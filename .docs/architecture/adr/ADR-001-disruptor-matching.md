@@ -11,6 +11,7 @@
 The order matching engine is the most latency-sensitive component in the system. It receives order events from multiple producer threads (REST, WebSocket, FIX) and must process them in strict order to maintain price-time priority correctness. A naive implementation using `synchronized` blocks or `ReentrantLock` would create contention and unpredictable latency spikes due to thread scheduling.
 
 The key requirements:
+
 - **Strict ordering**: Orders must be processed in submission order within a symbol
 - **Low latency**: Sub-microsecond event handoff from producers to the consumer
 - **High throughput**: Thousands of order events per second per symbol
@@ -23,6 +24,7 @@ The key requirements:
 Use **LMAX Disruptor** as the inter-thread messaging mechanism for each `OrderMatchingEngine` instance.
 
 **Configuration:**
+
 - Ring buffer size: **65,536** (2^16 — power of 2 required for bitwise modulo)
 - Producer type: **MULTI** (multiple REST/WS threads can submit orders)
 - Wait strategy: **BusySpinWaitStrategy** (lowest possible latency, pins one CPU core)
@@ -55,16 +57,19 @@ Use **LMAX Disruptor** as the inter-thread messaging mechanism for each `OrderMa
 ## Consequences
 
 **Positive:**
+
 - Sub-microsecond order event handoff between producer and consumer threads
 - Order book operations (TreeMap lookups/inserts) require no synchronization
 - Predictable low-latency behavior without GC-induced jitter in matching
 
 **Negative:**
+
 - One Disruptor consumer thread **pins a CPU core** per symbol (BusySpin). For 10 symbols, 10 cores are dedicated.
 - Requires `SYS_NICE` capability in Docker to set thread scheduling priority
 - Ring buffer overflow (back pressure) when producers are faster than the consumer for sustained periods — mitigated by the 65536-slot buffer and risk-based rate limiting
 
 **Trade-offs accepted:**
+
 - CPU cost of busy spinning is acceptable for an HFT system where latency is the primary concern
 - Operational complexity of per-symbol Disruptor instances is manageable
 

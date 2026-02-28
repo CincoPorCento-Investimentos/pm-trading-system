@@ -50,25 +50,30 @@ The HFT Trading Platform is responsible for:
 ## External Actors
 
 ### Human Trader
+
 - Interacts via REST API (`POST /api/v1/orders`) or WebSocket (`/ws/trading`)
 - Monitors open orders, positions, and P&L
 - Typical latency tolerance: milliseconds
 
 ### Algorithmic Client
+
 - Automated system hitting REST or WebSocket at high frequency
 - May use the binary TCP market data feed (port 9500) for low-latency data
 - Typical latency tolerance: microseconds
 
 ### Binance
+
 - Primary market data source (configurable)
 - Streams: `@trade`, `@depth@100ms`, `@ticker` via `wss://stream.binance.com`
 - Supports FIX 4.4 for order routing (configurable)
 
 ### Coinbase
+
 - Secondary market data source (configurable)
 - Streams: `ticker`, `level2` channels via Coinbase Advanced Trade WebSocket
 
 ### Generic FIX Exchange
+
 - Any FIX 4.4-compatible counterparty
 - Used for external order routing and receiving ExecutionReport messages
 

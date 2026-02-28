@@ -88,12 +88,14 @@ This ensures the sum of all in-flight orders is always within limits.
 ## Consequences
 
 **Positive:**
+
 - No order can bypass risk controls under any concurrency scenario
 - Simple mental model: order is safe if and only if `submitOrder()` returns success
 - Immediate rejection feedback to clients (no async callback needed for rejections)
 - Audit log accurately captures reject reason at submission time
 
 **Negative:**
+
 - Risk checks add ~1–5 µs to every order submission (acceptable)
 - Risk state is in-memory — requires reconstruction from PostgreSQL on restart
   - Mitigation: On startup, load open orders and positions from DB to restore pending exposure

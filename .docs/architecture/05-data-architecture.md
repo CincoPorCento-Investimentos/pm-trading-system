@@ -257,6 +257,7 @@ stateDiagram-v2
 ```
 
 Each state transition:
+
 1. Updates the in-memory `Order` object (new immutable copy via `@With`)
 2. Persists change to PostgreSQL via `orderRepository.updateStatus()` or `updateFill()`
 3. Notifies WebSocket listeners

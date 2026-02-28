@@ -40,6 +40,7 @@ hft-synthetic-monitoring/
 ```
 
 Também será criado:
+
 ```
 hft-synthetic-monitoring/
 └── src/main/resources/
@@ -68,12 +69,14 @@ curl -X GET http://localhost:8080/actuator/health \
 ```
 
 **Response Headers esperados:**
+
 ```
 HTTP/1.1 200 OK
 Content-Type: application/json
 ```
 
 **Response Body esperado:**
+
 ```json
 {
   "status": "UP",
@@ -83,6 +86,7 @@ Content-Type: application/json
   }
 }
 ```
+
 **Validações:** HTTP 200, `status` == `"UP"`
 
 ---
@@ -95,17 +99,20 @@ curl -X GET http://localhost:8080/actuator/prometheus \
 ```
 
 **Response Headers esperados:**
+
 ```
 HTTP/1.1 200 OK
 Content-Type: text/plain;version=0.0.4;charset=utf-8
 ```
 
 **Response Body esperado (trecho):**
+
 ```
 # HELP jvm_memory_used_bytes The amount of used memory
 # TYPE jvm_memory_used_bytes gauge
 jvm_memory_used_bytes{area="heap",id="G1 Eden Space"} 1.048576E7
 ```
+
 **Validações:** HTTP 200, body contém `jvm_memory_used_bytes`
 
 ---
@@ -132,12 +139,14 @@ curl -X POST http://localhost:8080/api/v1/orders \
 ```
 
 **Request Headers:**
+
 ```
 Content-Type: application/json
 Accept: application/json
 ```
 
 **Response Headers esperados:**
+
 ```
 HTTP/1.1 200 OK
 Content-Type: application/json
@@ -146,6 +155,7 @@ X-Latency-Ms: <number>
 ```
 
 **Response Body esperado:**
+
 ```json
 {
   "orderId": "1234567890123456789",
@@ -170,6 +180,7 @@ X-Latency-Ms: <number>
   "ackLatencyUs": null
 }
 ```
+
 **Validações:** HTTP 200, `orderId` != null, `status` in (`NEW`, `PENDING_NEW`), `symbol`/`side`/`price`/`quantity` == request
 
 ---
@@ -195,6 +206,7 @@ curl -X GET "http://localhost:8080/api/v1/orders/open?symbol=BTCUSDT" \
 ```
 
 **Response Body esperado:**
+
 ```json
 [
   {
@@ -205,6 +217,7 @@ curl -X GET "http://localhost:8080/api/v1/orders/open?symbol=BTCUSDT" \
   }
 ]
 ```
+
 **Validações:** HTTP 200, array contém a ordem criada no Step 1
 
 ---
@@ -217,6 +230,7 @@ curl -X DELETE http://localhost:8080/api/v1/orders/{orderId} \
 ```
 
 **Response Body esperado:**
+
 ```json
 {
   "orderId": "1234567890123456789",
@@ -227,6 +241,7 @@ curl -X DELETE http://localhost:8080/api/v1/orders/{orderId} \
   ...
 }
 ```
+
 **Validações:** HTTP 200, `status` == `CANCELLED`
 
 ---
@@ -237,6 +252,7 @@ curl -X DELETE http://localhost:8080/api/v1/orders/{orderId} \
 curl -X GET http://localhost:8080/api/v1/orders/{orderId} \
   -H "Accept: application/json"
 ```
+
 **Validações:** HTTP 200, `status` == `CANCELLED`
 
 ---
@@ -247,6 +263,7 @@ curl -X GET http://localhost:8080/api/v1/orders/{orderId} \
 curl -X GET "http://localhost:8080/api/v1/orders/open?symbol=BTCUSDT" \
   -H "Accept: application/json"
 ```
+
 **Validações:** HTTP 200, array NÃO contém o orderId cancelado
 
 ---
@@ -254,12 +271,14 @@ curl -X GET "http://localhost:8080/api/v1/orders/open?symbol=BTCUSDT" \
 ### 3.4 OrderQueryCheck
 
 **List orders com filtros:**
+
 ```bash
 curl -X GET "http://localhost:8080/api/v1/orders?limit=10" \
   -H "Accept: application/json"
 ```
 
 **Response Body esperado:**
+
 ```json
 [
   {
@@ -273,20 +292,25 @@ curl -X GET "http://localhost:8080/api/v1/orders?limit=10" \
   }
 ]
 ```
+
 **Validações:** HTTP 200, é um JSON array, cada item tem `orderId`, `symbol`, `status`
 
 **List com filtro de status:**
+
 ```bash
 curl -X GET "http://localhost:8080/api/v1/orders?symbol=BTCUSDT&status=CANCELLED&limit=5" \
   -H "Accept: application/json"
 ```
+
 **Validações:** HTTP 200, todos os itens têm `status` == `CANCELLED`
 
 **Open orders:**
+
 ```bash
 curl -X GET "http://localhost:8080/api/v1/orders/open" \
   -H "Accept: application/json"
 ```
+
 **Validações:** HTTP 200, é um JSON array
 
 ---
@@ -294,6 +318,7 @@ curl -X GET "http://localhost:8080/api/v1/orders/open" \
 ### 3.5 OrderValidationCheck (testa erros esperados)
 
 **Submit sem symbol (espera 400):**
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/orders \
   -H "Content-Type: application/json" \
@@ -307,6 +332,7 @@ curl -X POST http://localhost:8080/api/v1/orders \
 ```
 
 **Response esperado (HTTP 400):**
+
 ```json
 {
   "errorCode": "VALIDATION_ERROR",
@@ -317,6 +343,7 @@ curl -X POST http://localhost:8080/api/v1/orders \
 ```
 
 **Submit sem quantity (espera 400):**
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/orders \
   -H "Content-Type: application/json" \
@@ -330,6 +357,7 @@ curl -X POST http://localhost:8080/api/v1/orders \
 ```
 
 **Response esperado (HTTP 400):**
+
 ```json
 {
   "errorCode": "VALIDATION_ERROR",
@@ -340,6 +368,7 @@ curl -X POST http://localhost:8080/api/v1/orders \
 ```
 
 **Submit com quantity negativa (espera 400):**
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/orders \
   -H "Content-Type: application/json" \
@@ -354,6 +383,7 @@ curl -X POST http://localhost:8080/api/v1/orders \
 ```
 
 **Response esperado (HTTP 400):**
+
 ```json
 {
   "errorCode": "VALIDATION_ERROR",
@@ -364,12 +394,14 @@ curl -X POST http://localhost:8080/api/v1/orders \
 ```
 
 **GET order inexistente (espera 404):**
+
 ```bash
 curl -X GET http://localhost:8080/api/v1/orders/NONEXISTENT_ID_12345 \
   -H "Accept: application/json"
 ```
 
 **Response esperado (HTTP 404):**
+
 ```json
 {
   "errorCode": "ORDER_NOT_FOUND",
@@ -379,12 +411,14 @@ curl -X GET http://localhost:8080/api/v1/orders/NONEXISTENT_ID_12345 \
 ```
 
 **Cancel order inexistente (espera 404):**
+
 ```bash
 curl -X DELETE http://localhost:8080/api/v1/orders/NONEXISTENT_ID_12345 \
   -H "Accept: application/json"
 ```
 
 **Response esperado (HTTP 404):**
+
 ```json
 {
   "errorCode": "ORDER_NOT_FOUND",
@@ -394,6 +428,7 @@ curl -X DELETE http://localhost:8080/api/v1/orders/NONEXISTENT_ID_12345 \
 ```
 
 **Cancel order já cancelada (espera 409):**
+
 ```bash
 # Primeiro submete e cancela uma ordem, depois tenta cancelar novamente
 curl -X DELETE http://localhost:8080/api/v1/orders/{cancelledOrderId} \
@@ -401,6 +436,7 @@ curl -X DELETE http://localhost:8080/api/v1/orders/{cancelledOrderId} \
 ```
 
 **Response esperado (HTTP 409):**
+
 ```json
 {
   "errorCode": "INVALID_ORDER_STATE",
@@ -424,6 +460,7 @@ curl -X POST http://localhost:8080/api/v1/orders/cancel-batch \
 ```
 
 **Response esperado (HTTP 200):**
+
 ```json
 [
   { "orderId": "orderId1", "status": "CANCELLED", ... },
@@ -441,6 +478,7 @@ curl -X DELETE "http://localhost:8080/api/v1/orders/cancel-all?symbol=BTCUSDT" \
 ```
 
 **Response esperado (HTTP 200):**
+
 ```json
 [
   { "orderId": "...", "status": "CANCELLED", ... }
@@ -454,6 +492,7 @@ curl -X DELETE "http://localhost:8080/api/v1/orders/cancel-all?symbol=BTCUSDT" \
 **Endpoint:** `ws://localhost:8080/ws/trading`
 
 **Ping → Pong:**
+
 ```json
 // Client envia:
 {"type": "ping"}
@@ -463,6 +502,7 @@ curl -X DELETE "http://localhost:8080/api/v1/orders/cancel-all?symbol=BTCUSDT" \
 ```
 
 **Subscribe marketdata:**
+
 ```json
 // Client envia:
 {"type": "subscribe", "channel": "marketdata", "symbol": "BTCUSDT"}
@@ -472,6 +512,7 @@ curl -X DELETE "http://localhost:8080/api/v1/orders/cancel-all?symbol=BTCUSDT" \
 ```
 
 **Unsubscribe:**
+
 ```json
 // Client envia:
 {"type": "unsubscribe", "channel": "marketdata", "symbol": "BTCUSDT"}
@@ -481,6 +522,7 @@ curl -X DELETE "http://localhost:8080/api/v1/orders/cancel-all?symbol=BTCUSDT" \
 ```
 
 **Mensagem inválida → Error:**
+
 ```json
 // Client envia:
 {"type": "invalid_type_xyz"}
@@ -496,6 +538,7 @@ curl -X DELETE "http://localhost:8080/api/v1/orders/cancel-all?symbol=BTCUSDT" \
 ## 4. Classes Principais — Design
 
 ### SyntheticCheck (Interface)
+
 ```java
 public interface SyntheticCheck {
     String getName();
@@ -505,6 +548,7 @@ public interface SyntheticCheck {
 ```
 
 ### CheckResult
+
 ```java
 public record CheckResult(
     String checkName,
@@ -524,7 +568,9 @@ public record CheckStep(
 ```
 
 ### TradingApiClient
+
 Usa `RestClient` (Spring 6.1+) — leve, sem dependências extras:
+
 ```java
 @Component
 public class TradingApiClient {
@@ -539,6 +585,7 @@ public class TradingApiClient {
 ```
 
 ### CheckScheduler
+
 ```java
 @Component
 public class CheckScheduler {
@@ -548,12 +595,14 @@ public class CheckScheduler {
 ```
 
 ### AlertManager
+
 - Conta falhas consecutivas por check
 - Threshold configurável (default: 3 falhas consecutivas = alarme)
 - Quando threshold atingido → dispara alerta via AlertNotifier
 - Quando check volta ao normal → dispara alerta de recuperação
 
 ### AlertNotifier
+
 - Log em nível ERROR para falhas (sempre ativo)
 - Webhook HTTP opcional (Slack/Discord/custom) — configurável via URL
 - Métricas Prometheus (counter de falhas, gauge de status)
@@ -635,6 +684,7 @@ Nota: o checker NÃO depende de módulos internos (hft-common, etc). É proposit
 ## 7. Docker Integration
 
 Adicionar ao `docker-compose.yml`:
+
 ```yaml
 hft-synthetic-monitoring:
   build:
@@ -676,6 +726,7 @@ Dockerfile separado e simples (multi-stage) em `hft-synthetic-monitoring/Dockerf
 | `synthetic_alert_total{check}` | Counter | Total de alertas disparados |
 
 Adicionar ao `monitoring/prometheus.yml`:
+
 ```yaml
 - job_name: 'hft-synthetic-monitoring'
   metrics_path: '/actuator/prometheus'
