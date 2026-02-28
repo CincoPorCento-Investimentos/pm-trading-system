@@ -49,7 +49,8 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-None yet.
+- **Update project architecture docs** (area: docs) — Atualizar docs 02, 03, 08, 09 e README com referencias ao synthetic monitoring
+- **Create synthetic monitoring architecture doc** (area: docs) — Reescrever 10-synthetic-monitoring.md como doc de arquitetura pos-implementacao
 
 ### Blockers/Concerns
 
