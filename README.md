@@ -4,7 +4,7 @@ A high-frequency trading system for cryptocurrency built with Java 17, Spring Bo
 
 ## Architecture Overview
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                        HFT Trading Platform                              │
 ├─────────────────────────────────────────────────────────────────────────┤
@@ -61,7 +61,7 @@ A high-frequency trading system for cryptocurrency built with Java 17, Spring Bo
 
 ## Project Structure
 
-```
+```text
 crypto-hft-platform/
 ├── hft-common/       # Shared utilities and domain models
 ├── hft-sbe/          # SBE message schemas and codecs
@@ -77,22 +77,26 @@ crypto-hft-platform/
 ## Features
 
 ### Core Trading
+
 - **Order Matching Engine** - Price-time priority matching with LMAX Disruptor
 - **Risk Management** - Pre-trade risk checks, position limits, daily loss limits
 - **Position Tracking** - Real-time position and P&L calculation
 
 ### Connectivity
+
 - **REST API** - Order submission, cancellation, and queries
 - **WebSocket** - Real-time order updates and market data streaming
 - **FIX Protocol** - FIX 4.4 gateway for exchange connectivity
 - **TCP Server** - Low-latency binary protocol for market data
 
 ### Market Data
+
 - **WebSocket Clients** - Binance, Coinbase connectors
 - **Order Book Management** - Real-time order book with lock-free reads
 - **Tick Data Processing** - Sub-millisecond market data handling
 
 ### Performance
+
 - **Aeron IPC** - Sub-microsecond inter-process communication
 - **SBE Encoding** - Zero-copy binary serialization
 - **Off-heap Memory** - Direct buffers for reduced GC pressure
@@ -135,6 +139,7 @@ java -jar hft-app/target/hft-app-1.0.0-SNAPSHOT.jar
 ### API Endpoints
 
 #### Orders
+
 ```bash
 # Submit order
 POST /api/v1/orders
@@ -161,6 +166,7 @@ DELETE /api/v1/orders/cancel-all?symbol=BTCUSDT
 ```
 
 #### WebSocket
+
 ```javascript
 // Connect to WebSocket
 ws://localhost:8080/ws/trading
@@ -203,6 +209,7 @@ hft:
 ## Performance Tuning
 
 ### JVM Options
+
 ```bash
 -server
 -XX:+UseG1GC
@@ -215,6 +222,7 @@ hft:
 ```
 
 ### Linux Kernel Tuning
+
 ```bash
 # Increase network buffer sizes
 sysctl -w net.core.rmem_max=16777216
@@ -229,10 +237,10 @@ cpupower frequency-set -g performance
 
 ## Monitoring
 
-- **Prometheus Metrics**: http://localhost:9090
-- **Grafana Dashboards**: http://localhost:3000 (admin/admin123)
-- **Actuator Health**: http://localhost:8080/actuator/health
-- **Metrics Endpoint**: http://localhost:8080/actuator/prometheus
+- **Prometheus Metrics**: <http://localhost:9090>
+- **Grafana Dashboards**: <http://localhost:3000> (admin/admin123)
+- **Actuator Health**: <http://localhost:8080/actuator/health>
+- **Metrics Endpoint**: <http://localhost:8080/actuator/prometheus>
 
 ## Testing
 

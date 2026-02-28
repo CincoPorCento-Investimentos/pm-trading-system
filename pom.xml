@@ -29,6 +29,7 @@
         <module>hft-api</module>
         <module>hft-persistence</module>
         <module>hft-app</module>
+        <module>hft-synthetic-monitoring</module>
     </modules>
 
     <properties>
@@ -102,6 +103,11 @@
             <dependency>
                 <groupId>com.cryptohft</groupId>
                 <artifactId>hft-persistence</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.cryptohft</groupId>
+                <artifactId>hft-synthetic-monitoring</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

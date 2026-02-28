@@ -29,7 +29,7 @@
 -->
 
 | | Benefício |
-|---|-----------|
+| - | --------- |
 | 👤 **Usuário** | <!-- Ex: Checkout 2x mais rápido, novo fluxo de depósito PIX --> |
 | 🧑‍💻 **Dev Experience** | <!-- Ex: Onboarding de novos devs 3x mais rápido com docs modulares --> |
 | 💰 **Negócio** | <!-- Ex: Desbloqueia módulo de trading, reduz churn no pagamento --> |
@@ -76,7 +76,7 @@
 -->
 
 | Aspecto | Antes 😫 | Depois 🎯 |
-|---------|----------|-----------|
+| ------- | -------- | --------- |
 | <!-- Ex: Navegação --> | <!-- Ex: 1 arquivo gigante --> | <!-- Ex: Índice + docs especializados --> |
 
 ---
@@ -127,7 +127,7 @@
 -->
 
 | Métrica | Valor |
-|---------|-------|
+| ------- | ----- |
 | 📁 Arquivos alterados | **X** |
 | ➕ Linhas adicionadas | **X** |
 | ➖ Linhas removidas | **X** |
