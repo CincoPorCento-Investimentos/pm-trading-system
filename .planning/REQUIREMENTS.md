@@ -101,13 +101,44 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated during roadmap creation) | | |
+| CORE-01 | Phase 1 | Pending |
+| CORE-02 | Phase 1 | Pending |
+| CORE-03 | Phase 5 | Pending |
+| CORE-04 | Phase 1 | Pending |
+| CORE-05 | Phase 5 | Pending |
+| HTTP-01 | Phase 2 | Pending |
+| HTTP-02 | Phase 2 | Pending |
+| WS-01 | Phase 2 | Pending |
+| WS-02 | Phase 2 | Pending |
+| HLTH-01 | Phase 3 | Pending |
+| HLTH-02 | Phase 3 | Pending |
+| ORD-01 | Phase 3 | Pending |
+| ORD-02 | Phase 3 | Pending |
+| ORD-03 | Phase 3 | Pending |
+| ORD-04 | Phase 3 | Pending |
+| ORD-05 | Phase 3 | Pending |
+| ORD-06 | Phase 3 | Pending |
+| ORD-07 | Phase 3 | Pending |
+| WSC-01 | Phase 4 | Pending |
+| WSC-02 | Phase 4 | Pending |
+| WSC-03 | Phase 4 | Pending |
+| WSC-04 | Phase 4 | Pending |
+| ALRT-01 | Phase 5 | Pending |
+| ALRT-02 | Phase 5 | Pending |
+| ALRT-03 | Phase 5 | Pending |
+| ALRT-04 | Phase 5 | Pending |
+| OBS-01 | Phase 6 | Pending |
+| OBS-02 | Phase 6 | Pending |
+| OBS-03 | Phase 6 | Pending |
+| DOCK-01 | Phase 6 | Pending |
+| DOCK-02 | Phase 6 | Pending |
+| DOCK-03 | Phase 6 | Pending |
 
 **Coverage:**
 - v1 requirements: 28 total
-- Mapped to phases: 0
-- Unmapped: 28
+- Mapped to phases: 28
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-27*
-*Last updated: 2026-02-27 after initial definition*
+*Last updated: 2026-02-27 after roadmap creation*
